@@ -3,7 +3,7 @@
   require_once '../vendor/autoload.php';
 
   $today = (new DateTimeImmutable())->format('Y/m/d');
-  var_dump(getWorkday('2021/09/23', 1));
+  var_dump(getWorkday($today, 1));
 
   /**
    * 日付と日数を指定してn日後の営業日を求める.
