@@ -2,41 +2,37 @@
 
   require_once dirname(__FILE__, 1).'/../vendor/autoload.php';
 
-  $today = (new DateTimeImmutable())->format('Y/m/d');
+  $today = new DateTime();
   var_dump(getWorkday($today, 3));
 
   /**
    * 日付と日数を指定してn日後の営業日を求める.
    * 引数で指定した日は含めない.
+   * $day > 0 → n日後の営業日、$day = 0 ⇒ 最短の営業日, $day < 0 ⇒ n日前の営業日を返す.
    *
-   * @param string $start_date 起算日
+   * @param object $start_date 起算日
    * @param int    $day        日数
    *
-   * @return string n日後の営業日
+   * @return object n日前後の営業日
    */
-  function getWorkday(string $start_date, int $day): string
+  function getWorkday(object $start_date, int $day): object
   {
-      $date = new DateTime($start_date);
-      if ($day === 0) {
-          return $date;
-      }
+      $date = clone $start_date;
 
       if ($day < 0) {
           for ($i = 0;;) {
               if (!isHoliday($date->format('Y/m/d')) && --$i <= $day) {
-                  return $date->format('Y/m/d');
+                  return $date;
               }
               $date->modify('-1day');
           }
       }
 
-      if ($day > 0) {
-          for ($i = 0;;) {
-              if (!isHoliday($date->format('Y/m/d')) && ++$i >= $day) {
-                  return $date->format('Y/m/d');
-              }
-              $date->modify('+1day');
+      for ($i = 0;;) {
+          if (!isHoliday($date->format('Y/m/d')) && ++$i >= $day) {
+              return $date;
           }
+          $date->modify('+1day');
       }
   }
 
