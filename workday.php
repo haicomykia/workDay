@@ -1,9 +1,9 @@
 <?php
 
-  require_once '../vendor/autoload.php';
+  require_once dirname(__FILE__, 1).'/../vendor/autoload.php';
 
   $today = (new DateTimeImmutable())->format('Y/m/d');
-  var_dump(getWorkday($today, 1));
+  var_dump(getWorkday($today, 3));
 
   /**
    * 日付と日数を指定してn日後の営業日を求める.
@@ -49,6 +49,11 @@
   {
       $date = new DateTimeImmutable($date);
 
+      // 土日判定
+      if ($date->format('w') % 6 === 0) {
+          return true;
+      }
+
       // 年末年始、GW、お盆
       $special_holidays = [
         new DateTimeImmutable('2021/4/30'),
@@ -65,7 +70,14 @@
         new DateTimeImmutable('2021/12/29'),
         new DateTimeImmutable('2021/12/30'),
         new DateTimeImmutable('2021/12/31'),
+        new DateTimeImmutable('2021/12/29'),
+        new DateTimeImmutable('2021/12/30'),
+        new DateTimeImmutable('2021/12/31'),
       ];
+      /*
+       * strict = trueだと同じインスタンスのときにtrueとなるが、
+       * $dateと配列$special_holidaysの各要素は同じインスタンスにはならないので、strict = falseとした
+       */
       if (in_array($date, $special_holidays)) {
           return true;
       }
@@ -73,10 +85,6 @@
       // 祝日判定
       $year = $date->format('Y');
       $holidays = \Yasumi\Yasumi::create('Japan', $year, 'ja_JP');
-      if ($holidays->isHoliday($date)) {
-          return true;
-      }
 
-      // 土日判定
-      return $date->format('w') % 6 === 0;
+      return $holidays->isHoliday($date);
   }
